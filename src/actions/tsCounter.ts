@@ -4,4 +4,4 @@ const createAction = actionCreatorFactory('tsCounter');
 
 export const reset = createAction<{ payload: number }>('reset');
 export const increase = createAction<{ payload: number }>('increase');
-export const fetch = createAction<never>('fetch');
+export const fetch = createAction('fetch');

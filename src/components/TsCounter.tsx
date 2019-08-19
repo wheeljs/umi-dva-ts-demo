@@ -4,16 +4,32 @@ import { Button } from 'antd';
 import { increase, fetch } from '@/actions/tsCounter';
 import { GlobalState } from '@/model-types';
 
-interface CounterStateProps {
-  count: number;
-}
-
-interface CounterProps extends CounterStateProps {
+interface CounterNeedsProps {
   now: Date;
 }
 
+function mapStateToProps(state: GlobalState, ownProps: CounterNeedsProps) {
+  let offsetedDate;
+  if (ownProps.now) {
+    const { now } = ownProps;
+    offsetedDate = now.setDate(now.getDate() + 1);
+  }
+  return {
+    count: state.tsCounter.count,
+    date: offsetedDate
+  };
+}
+
+const dispatchMapping = {
+  onIncrease: increase,
+  next: fetch
+};
+
+type CounterProps = ReturnType<typeof mapStateToProps> &
+  typeof dispatchMapping & CounterNeedsProps;
+
 class TsCounter
-  extends Component</* 这里到底应该怎么写，才能在组件中取到Umi，connect 和组件自身需要的Props 呢？ */CounterProps> {
+  extends Component<CounterProps> {
   constructor(props: CounterProps) {
     super(props);
   }
@@ -43,21 +59,6 @@ class TsCounter
   }
 }
 
-function mapStateToProps(state: GlobalState, ownProps: CounterProps) {
-  let offsetedDate;
-  if (ownProps.now) {
-    const { now } = ownProps;
-    offsetedDate = now.setDate(now.getDate() + 1);
-  }
-  return {
-    count: state.tsCounter.count,
-    date: offsetedDate
-  };
-}
-
-const wrappedComponent = connect(mapStateToProps, {
-  onIncrease: increase,
-  next: fetch
-})(TsCounter);
+const wrappedComponent = connect(mapStateToProps, dispatchMapping)(TsCounter);
 
 export default wrappedComponent;
